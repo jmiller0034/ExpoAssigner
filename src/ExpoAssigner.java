@@ -4,6 +4,7 @@ import org.json.*;
 public class ExpoAssigner {
 	public static void main (String[] args) {
 		try {
+			//File file = new File("/Users/jakemiller/Downloads/Fall EXPO 2017_ Volunteer Sign Up.csv");
 			File file = new File("/Users/zachmiller/Downloads/Fall EXPO 2017_ Volunteer Sign Up.csv");
 			FileReader fileReader = new FileReader(file);
 			BufferedReader bufferedReader = new BufferedReader(fileReader);
