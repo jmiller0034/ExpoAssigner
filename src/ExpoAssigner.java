@@ -4,7 +4,8 @@ import org.json.*;
 public class ExpoAssigner {
 	public static void main (String[] args) {
 		try {
-			File file = new File("/Users/jakemiller/Downloads/Fall EXPO 2017_ Volunteer Sign Up.csv");
+			//File file = new File("/Users/jakemiller/Downloads/Fall EXPO 2017_ Volunteer Sign Up.csv");
+			File file = new File("/Users/zachmiller/Downloads/Fall EXPO 2017_ Volunteer Sign Up.csv");
 			FileReader fileReader = new FileReader(file);
 			BufferedReader bufferedReader = new BufferedReader(fileReader);
 			StringBuffer stringBuffer = new StringBuffer();
@@ -30,7 +31,7 @@ public class ExpoAssigner {
 					//System.out.println(header[i] + ": " + data[i]);
 					
 				}
-				System.out.println(jObject.toString());
+			//	System.out.println(jObject.toString());
 				jArray.put(jObject);
 				
 				stringBuffer.append(line);
@@ -41,12 +42,28 @@ public class ExpoAssigner {
 		//	System.out.println("Contents of file:");
 		//	System.out.println(stringBuffer.toString());
 			System.out.println(counter);
-			JSONObject jo = jArray.getJSONObject(1);
-			System.out.println(jo.get("First Name"));
+			//JSONObject jo = jArray.getJSONObject(1);
+			//System.out.println(jo.get("First Name"));
+			assigner(jArray, "Training Time - First Choice");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
 		
 	}
-}
+	public static void assigner(JSONArray responses, String header){
+		JSONObject entry;
+		String value;
+		try {
+		for(int i=0; i< responses.length(); i++) {
+			entry= responses.getJSONObject(i);
+			value=entry.getString(header);
+			System.out.println(value);
+			
+		}
+		}
+		catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+} 
