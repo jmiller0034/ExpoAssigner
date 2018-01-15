@@ -1,11 +1,18 @@
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
 import org.json.*;
 
 public class ExpoAssigner {
+	
+	private static Properties props;
+	
 	public static void main (String[] args) {
 		try {
-			//File file = new File("/Users/jakemiller/Downloads/Fall EXPO 2017_ Volunteer Sign Up.csv");
-			File file = new File("/Users/zachmiller/Downloads/Fall EXPO 2017_ Volunteer Sign Up.csv");
+			init();
+			File file = new File(props.getProperty("inputFilePath"));
 			FileReader fileReader = new FileReader(file);
 			BufferedReader bufferedReader = new BufferedReader(fileReader);
 			StringBuffer stringBuffer = new StringBuffer();
@@ -28,10 +35,8 @@ public class ExpoAssigner {
 					if (!headerName.isEmpty() && !dataEntry.isEmpty()) {
 						jObject.put(headerName, dataEntry);
 					}
-					//System.out.println(header[i] + ": " + data[i]);
 					
 				}
-			//	System.out.println(jObject.toString());
 				jArray.put(jObject);
 				
 				stringBuffer.append(line);
@@ -39,11 +44,7 @@ public class ExpoAssigner {
 				counter++;				
 			}
 			fileReader.close();
-		//	System.out.println("Contents of file:");
-		//	System.out.println(stringBuffer.toString());
 			System.out.println(counter);
-			//JSONObject jo = jArray.getJSONObject(1);
-			//System.out.println(jo.get("First Name"));
 			assigner(jArray, "Training Time - First Choice");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -54,16 +55,80 @@ public class ExpoAssigner {
 	public static void assigner(JSONArray responses, String header){
 		JSONObject entry;
 		String value;
+		List<String> outputString = new ArrayList<String>();
+		List<String> dataForCsvLine;
+		outputString.add("\"Email\",\"First choice\"\n");
+		System.out.println(outputString.get(0));
 		try {
-		for(int i=0; i< responses.length(); i++) {
-			entry= responses.getJSONObject(i);
-			value=entry.getString(header);
-			System.out.println(value);
-			
-		}
+			for(int i=0; i< responses.length(); i++) {
+				entry= responses.getJSONObject(i);
+				value=entry.getString(header);
+				dataForCsvLine = new ArrayList<String>();
+				dataForCsvLine.add(entry.getString("Email"));
+				dataForCsvLine.add(value);
+				System.out.println(csvWriterHelper(dataForCsvLine));
+				outputString.add(csvWriterHelper(dataForCsvLine));
+				
+			}
+			csvWriter(outputString);
 		}
 		catch (Exception ex) {
 			ex.printStackTrace();
 		}
 	}
+	
+	
+	public static String csvWriterHelper(List<String> inputValue) {
+		// input - data to display in a line
+		// output - csv line 
+		String csvLine = "";
+		
+		for (String value : inputValue) {
+			if (csvLine.length() != 0) {
+				csvLine += ",";
+			}
+			csvLine += "\"" +  value + "\"";
+		}
+		csvLine += "\n";
+		
+		return csvLine;
+	}
+	
+	public static void csvWriter (List<String> inputLines){
+		String filename = props.getProperty("outputFilePath");
+		FileWriter fw = null;
+		try {
+		fw = new FileWriter(filename, true);
+		BufferedWriter vw = new BufferedWriter(fw);
+		for (String line : inputLines) {
+			vw.write(line);
+		}
+		vw.close();
+		} 
+		catch (Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			if (fw != null) {
+				try {
+					fw.close();
+					
+				}
+				catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	public static void init() {
+		try {
+			props = new Properties();
+			InputStream is = new FileInputStream(new File(".").getCanonicalPath() + "/props/AssignerProperties.properties");
+			props.load(is);
+		}
+		catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+	
 } 
