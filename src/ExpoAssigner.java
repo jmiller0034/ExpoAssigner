@@ -98,7 +98,7 @@ public class ExpoAssigner {
 		String filename = props.getProperty("outputFilePath");
 		FileWriter fw = null;
 		try {
-		fw = new FileWriter(filename, true);
+		fw = new FileWriter(filename, false);
 		BufferedWriter vw = new BufferedWriter(fw);
 		for (String line : inputLines) {
 			vw.write(line);
