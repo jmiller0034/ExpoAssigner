@@ -57,13 +57,14 @@ public class ExpoAssigner {
 		String value;
 		List<String> outputString = new ArrayList<String>();
 		List<String> dataForCsvLine;
-		outputString.add("\"Email\",\"First choice\"\n");
+		outputString.add("\"Name\",\"Email\",\"First choice\"\n");
 		System.out.println(outputString.get(0));
 		try {
 			for(int i=0; i< responses.length(); i++) {
 				entry= responses.getJSONObject(i);
 				value=entry.getString(header);
 				dataForCsvLine = new ArrayList<String>();
+				dataForCsvLine.add(entry.getString("First Name") + " " + entry.getString("Last Name"));
 				dataForCsvLine.add(entry.getString("Email"));
 				dataForCsvLine.add(value);
 				System.out.println(csvWriterHelper(dataForCsvLine));
@@ -98,7 +99,7 @@ public class ExpoAssigner {
 		String filename = props.getProperty("outputFilePath");
 		FileWriter fw = null;
 		try {
-		fw = new FileWriter(filename, false);
+		fw = new FileWriter(filename, true);
 		BufferedWriter vw = new BufferedWriter(fw);
 		for (String line : inputLines) {
 			vw.write(line);
