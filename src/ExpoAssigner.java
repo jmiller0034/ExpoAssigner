@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+
 import org.json.*;
 
 public class ExpoAssigner {
@@ -45,7 +46,8 @@ public class ExpoAssigner {
 			}
 			fileReader.close();
 			System.out.println(counter);
-			assigner(jArray, "Training Time - First Choice");
+			JSONArray forMethod = jArray;
+			assigner(forMethod, "Training Time");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -54,22 +56,37 @@ public class ExpoAssigner {
 	}
 	public static void assigner(JSONArray responses, String header){
 		JSONObject entry;
+		String firstChoice = " - First Choice";
+		String secondChoice = " - Second Choice";
 		String value;
+		String day;
+		int cap;
 		List<String> outputString = new ArrayList<String>();
 		List<String> dataForCsvLine;
 		outputString.add("\"Name\",\"Email\",\"First choice\"\n");
 		System.out.println(outputString.get(0));
 		try {
-			for(int i=0; i< responses.length(); i++) {
-				entry= responses.getJSONObject(i);
-				value=entry.getString(header);
-				dataForCsvLine = new ArrayList<String>();
-				dataForCsvLine.add(entry.getString("First Name") + " " + entry.getString("Last Name"));
-				dataForCsvLine.add(entry.getString("Email"));
-				dataForCsvLine.add(value);
-				System.out.println(csvWriterHelper(dataForCsvLine));
-				outputString.add(csvWriterHelper(dataForCsvLine));
-				
+			for (int j = 0; j < EXPOCONSTANTS.TRAINING_DAYS.length; j++) {
+				cap = EXPOCONSTANTS.MAX_TRAINEES_PER_DAY;
+				day = EXPOCONSTANTS.TRAINING_DAYS[j];
+				for(int i=0; i< responses.length(); i++) {
+					entry= responses.getJSONObject(i);
+					value=entry.getString(header + firstChoice);
+					dataForCsvLine = new ArrayList<String>();
+					if (value.contains(day)) {
+						if (cap > 0) {
+							dataForCsvLine.add(entry.getString("First Name") + " " + entry.getString("Last Name"));
+							dataForCsvLine.add(entry.getString("Email"));
+							dataForCsvLine.add(value);
+							--cap;
+						}  else {
+							System.out.println("cannot assign " + entry.getString("First Name") + " " + entry.getString("Last Name")  + " " + day);
+						}
+					}
+					System.out.println(csvWriterHelper(dataForCsvLine));
+					outputString.add(csvWriterHelper(dataForCsvLine));
+					
+				}
 			}
 			csvWriter(outputString);
 		}
@@ -99,7 +116,7 @@ public class ExpoAssigner {
 		String filename = props.getProperty("outputFilePath");
 		FileWriter fw = null;
 		try {
-		fw = new FileWriter(filename, true);
+		fw = new FileWriter(filename, false);
 		BufferedWriter vw = new BufferedWriter(fw);
 		for (String line : inputLines) {
 			vw.write(line);
@@ -120,6 +137,9 @@ public class ExpoAssigner {
 			}
 		}
 	}
+	
+	
+	
 	
 	public static void init() {
 		try {
