@@ -1,3 +1,2 @@
-props/
-bin/
-
+*.properties
+*.class

@@ -133,6 +133,7 @@ public class ExpoAssigner {
 				}
 				catch (Exception ex) {
 					ex.printStackTrace();
+					
 				}
 			}
 		}
