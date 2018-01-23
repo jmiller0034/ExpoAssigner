@@ -56,9 +56,11 @@ public class ExpoAssigner {
 	}
 	public static void assigner(JSONArray responses, String header){
 		JSONObject entry;
+		JSONObject daysWithSpotsAvailable = new JSONObject();
 		String firstChoice = " - First Choice";
 		String secondChoice = " - Second Choice";
 		String value;
+		String value2;
 		String day;
 		int cap;
 		List<String> outputString = new ArrayList<String>();
@@ -72,6 +74,7 @@ public class ExpoAssigner {
 				for(int i=0; i< responses.length(); i++) {
 					entry= responses.getJSONObject(i);
 					value=entry.getString(header + firstChoice);
+					value2 = entry.getString(header + secondChoice);
 					dataForCsvLine = new ArrayList<String>();
 					if (value.contains(day)) {
 						if (cap > 0) {
@@ -79,15 +82,31 @@ public class ExpoAssigner {
 							dataForCsvLine.add(entry.getString("Email"));
 							dataForCsvLine.add(value);
 							--cap;
+							System.out.println(csvWriterHelper(dataForCsvLine));
+							outputString.add(csvWriterHelper(dataForCsvLine));
 						}  else {
+							entry.put("missedFirst", true);
 							System.out.println("cannot assign " + entry.getString("First Name") + " " + entry.getString("Last Name")  + " " + day);
 						}
+					} else if (value2.contains(day) && entry.has("missedFirst")) {
+						dataForCsvLine.add(entry.getString("First Name") + " " + entry.getString("Last Name"));
+						dataForCsvLine.add(entry.getString("Email"));
+						dataForCsvLine.add(value2);
+						--cap;
+						entry.remove("missedFirst");
+						System.out.println(csvWriterHelper(dataForCsvLine));
+						outputString.add(csvWriterHelper(dataForCsvLine));						
 					}
-					System.out.println(csvWriterHelper(dataForCsvLine));
-					outputString.add(csvWriterHelper(dataForCsvLine));
-					
+				}
+				if (cap != 0) {
+					daysWithSpotsAvailable.put(day, cap);
 				}
 			}
+			
+			// JSONArray missedFirstChoice = missedFirstChoice();
+			// assignRemainingDay(missedFirstChoice, daysWithSpotsAvailable, header, dataForCsvLine) 
+			// call missedFirstChoice again
+			// do stuff with entries that have not been assigned
 			csvWriter(outputString);
 		}
 		catch (Exception ex) {
@@ -139,8 +158,43 @@ public class ExpoAssigner {
 		}
 	}
 	
+	public static JSONArray missedFirstChoice(JSONArray inputArray) throws Exception {
+		JSONArray missedFirstChoiceArray = new JSONArray();
+		JSONObject entry;
+		for (int i = 0; i < inputArray.length(); i++) {
+			entry = inputArray.getJSONObject(i);
+			if (entry.has("missedFirst")) {
+				missedFirstChoiceArray.put(entry);
+			}
+		}
+		
+		return missedFirstChoiceArray;
+	}
 	
 	
+	public static void assignRemainingDay (JSONArray remainingVolunteers, JSONObject remainingDays, String header,
+			List<String> dataForCsv) throws Exception {
+		String day;
+		int cap;
+		JSONObject entry;
+		String value;
+		
+		for (int i = 0; i < EXPOCONSTANTS.TRAINING_DAYS.length; i++) {
+			day = EXPOCONSTANTS.TRAINING_DAYS[i];
+			if (remainingDays.has(day)) {
+				cap = remainingDays.getInt(day);
+				for (int j = 0; j < remainingVolunteers.length(); j++) {
+					entry = remainingVolunteers.getJSONObject(j);
+					value = entry.getString(header);
+					if (value.contains(day) && cap > 0) {
+						//add to dataForCsv
+						--cap;
+						entry.remove("missedFirst");
+					}
+				}
+			}
+		}
+	}
 	
 	public static void init() {
 		try {
